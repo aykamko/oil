@@ -11,8 +11,16 @@ set -o errexit
 # in benchmarks/common.sh.
 readonly OSH=${OSH:-bin/osh}
 
+readonly UNAME=$(uname)
+
+if [[ "$UNAME" == "Darwin" ]]; then
+  readonly NPROC=$(sysctl -n hw.ncpu)
+else  # Linux
+  readonly NPROC=$(nproc)
+fi
+
 # For xargs -P in spec-runner.sh, wild-runner.sh.
-readonly JOBS=$(( $(nproc) - 1 ))
+readonly JOBS=$(( $NPROC - 1 ))
 
 log() {
   echo "$@" 1>&2

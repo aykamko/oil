@@ -13,6 +13,20 @@ set -o errexit
 
 source build/common.sh
 
+# Modified from https://github.com/pyenv/pyenv
+# Source: https://git.io/vhmzh
+use_homebrew_readline() {
+  local libdir="$(brew --prefix readline 2>/dev/null || true)"
+  if [[ -d "$libdir" ]]; then
+    echo "prepare.sh: using readline from homebrew"
+    export CPPFLAGS="-I$libdir/include"
+    export LDFLAGS="-L$libdir/lib"
+  else
+    echo "Please install readline through Homebrew: brew install readline" >&2
+    exit 1
+  fi
+}
+
 configure() {
   local dir=${1:-$PREPARE_DIR}
 
@@ -20,6 +34,8 @@ configure() {
   mkdir -p $dir
 
   local conf=$PWD/$PY27/configure 
+
+  is_macos && use_homebrew_readline || true
 
   pushd $dir 
   time $conf --without-threads
@@ -34,7 +50,6 @@ configure() {
 # -O2, 30 s with -O0.  The Make part of the build is parallelized, but the
 # setup.py part is not!
 
-readonly NPROC=$(nproc)
 readonly JOBS=$(( NPROC == 1 ? NPROC : NPROC-1 ))
 
 build-python() {

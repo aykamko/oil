@@ -15,7 +15,7 @@ write-release-date() {
   mkdir -p _build  # Makefile makes this, but scripts/release.sh needs it too
 
   # Write a readable, sortable date that is independent of time zone.
-  date --utc --rfc-3339 seconds > _build/release-date.txt
+  $DATE_PROG --utc --rfc-3339 seconds > _build/release-date.txt
 }
 
 main-name() {
@@ -39,11 +39,11 @@ c-module-toc() {
 
 # Modules needed to 'import runpy'.
 runpy-deps() {
-  $PREPARE_DIR/python -S build/runpy_deps.py both "$@"
+  $CPYTHON_PROG -S build/runpy_deps.py both "$@"
 }
 
 runpy-py-to-compile() {
-  $PREPARE_DIR/python -S build/runpy_deps.py py
+  $CPYTHON_PROG -S build/runpy_deps.py py
 }
 
 # This version gets the paths out of the repo.  But it requires that we
@@ -69,7 +69,7 @@ app-deps() {
   ln -s -f $PWD/build/app_deps.py _tmp
 
   PYTHONPATH=$pythonpath \
-    $PREPARE_DIR/python -S _tmp/app_deps.py both $main_module $prefix
+    $CPYTHON_PROG -S _tmp/app_deps.py both $main_module $prefix
 }
 
 # .py files to compile
@@ -78,7 +78,17 @@ py-to-compile() {
   local main_module=${2:-hello}
 
   PYTHONPATH=$pythonpath \
-    $PREPARE_DIR/python -S build/app_deps.py py $main_module
+    $CPYTHON_PROG -S build/app_deps.py py $main_module
+}
+
+symlink-platform-pyconfig-h() {
+  pushd $PY27
+  if is_macos; then
+    ln -f pyconfig.macos.h pyconfig.h
+  else
+    ln -f pyconfig.linux.h pyconfig.h
+  fi
+  popd
 }
 
 # For embedding in oil/bytecode.zip.
@@ -153,7 +163,7 @@ gen-module-init() {
 
   local template=$PY27/Modules/config.c.in
 
-  awk -v template=$template -v extdecls="$extdecls" -v initbits="$initbits" '
+  $AWK_PROG -v template="$template" -v extdecls="$extdecls" -v initbits="$initbits" '
     BEGIN {
       print "/* Generated automatically from " template " */"
     }
@@ -168,7 +178,7 @@ gen-module-init() {
     {
       print $0
     }
-    ' $template
+    ' "$template"
 }
 
 #

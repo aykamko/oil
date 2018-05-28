@@ -171,22 +171,27 @@ build() {
 
   pushd $PY27
 
-  local compile_readline
-  local link_readline
+  local readline_dir
+  local readline_flags
   if test "$HAVE_READLINE" = 1; then
     # Readline interface for tokenizer.c and [raw_]input() in bltinmodule.c.
     # For now, we are using raw_input() for the REPL.  TODO: Parameterize this!
     # We should create a special no_readline_raw_input().
 
     c_module_src_list=$(cat $abs_c_module_srcs)
+
     # NOTE: pyconfig.h has HAVE_LIBREADLINE but doesn't appear to use it?
-    compile_readline='-D HAVE_READLINE'
-    link_readline='-l readline'
+    readline_flags=(-D HAVE_READLINE)
+
+    if is_macos; then
+      readline_dir=$(brew --prefix readline)
+      readline_flags+=(-L "$readline_dir/lib" -I "$readline_dir/include")
+    fi
+    readline_flags+=(-l readline)
   else
     # don't fail
     c_module_src_list=$(grep -v '/readline.c' $abs_c_module_srcs || true)
-    compile_readline=''
-    link_readline=''
+    readline_flags=()
   fi
 
   # $PREFIX comes from ./configure and defaults to /usr/local.
@@ -206,9 +211,8 @@ build() {
     $abs_main_name \
     $c_module_src_list \
     Modules/ovm.c \
-    $compile_readline \
     -l m \
-    $link_readline \
+    "${readline_flags[@]}" \
     "$@" \
     || true
   popd
@@ -331,7 +335,7 @@ make-tar() {
   # - We include intermediate files like c-module-srcs.txt, so we don't have to
   #   ship tools app_deps.py.  The end-user build shouldn't depend on Python.
 
-  tar --create --transform "$sed_expr" --file $out \
+  $TAR_PROG --create --transform "$sed_expr" --file $out \
     LICENSE.txt \
     INSTALL.txt \
     configure \
