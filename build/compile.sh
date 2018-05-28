@@ -171,6 +171,8 @@ build() {
 
   pushd $PY27
 
+  _setup-platform-pyconfig-h
+
   local readline_dir
   local readline_flags
   if test "$HAVE_READLINE" = 1; then
