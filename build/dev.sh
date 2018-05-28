@@ -24,15 +24,6 @@ ubuntu-deps() {
   test/spec.sh install-shells
 }
 
-macos-deps() {
-  if ! hash brew 2>/dev/null; then
-    echo 'Please install homebrew: https://brew.sh/' >&2
-    exit 1
-  fi
-
-  brew install coreutils readline gawk gnu-tar
-}
-
 # Produces _devbuild/gen/osh_help.py
 gen-help() {
   build/doc.sh osh-quick-ref

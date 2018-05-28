@@ -11,20 +11,8 @@ set -o errexit
 # in benchmarks/common.sh.
 readonly OSH=${OSH:-bin/osh}
 
-readonly UNAME=$(uname)
-
-is_macos() {
-  [[ "$UNAME" == "Darwin" ]] || return 1
-}
-
-if is_macos; then
-  readonly NPROC=$(sysctl -n hw.ncpu)
-else  # Linux
-  readonly NPROC=$(nproc)
-fi
-
 # For xargs -P in spec-runner.sh, wild-runner.sh.
-readonly JOBS=$(( $NPROC - 1 ))
+readonly JOBS=$(( $(nproc) - 1 ))
 
 log() {
   echo "$@" 1>&2
