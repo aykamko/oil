@@ -169,9 +169,9 @@ build() {
   # HAVE_READLINE defined in detected-config.sh.
   source-detected-config-or-die
 
-  pushd $PY27
-
   _setup-platform-pyconfig-h
+
+  pushd $PY27
 
   local readline_dir
   local readline_flags
@@ -265,20 +265,16 @@ python-sources() {
 }
 
 _setup-platform-pyconfig-h() {
-  pushd $PY27
   if is_macos; then
     cp pyconfig.macos.h pyconfig.h
   else
     cp pyconfig.linux.h pyconfig.h
   fi
-  popd
 }
 
 _headers() {
   local c_module_srcs=${1:-_tmp/hello/c-module-srcs.txt}
   local abs_c_module_srcs=$PWD/$c_module_srcs
-
-  _setup-platform-pyconfig-h
 
   # -MM: no system headers
   cd $PY27
@@ -366,6 +362,8 @@ make-tar() {
     $c_module_srcs \
     $(cat $c_module_srcs | add-py27) \
     $(python-headers $c_module_srcs) \
+    $PY27/pyconfig.linux.h \
+    $PY27/pyconfig.macos.h \
     $(python-sources)
 
   ls -l $out
