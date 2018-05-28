@@ -169,9 +169,9 @@ build() {
   # HAVE_READLINE defined in detected-config.sh.
   source-detected-config-or-die
 
-  _setup-platform-pyconfig-h
-
   pushd $PY27
+
+  _setup-platform-pyconfig-h
 
   local readline_dir
   local readline_flags
@@ -278,12 +278,24 @@ _headers() {
 
   # -MM: no system headers
   cd $PY27
+
+  cp pyconfig.linux.h pyconfig.h
   gcc \
     "${INCLUDE_PATHS[@]}" \
     "${PREPROC_FLAGS[@]}" \
     -MM $OVM_LIBRARY_OBJS \
     Modules/ovm.c \
     $(cat $abs_c_module_srcs)
+
+  cp pyconfig.macos.h pyconfig.h
+  gcc \
+    "${INCLUDE_PATHS[@]}" \
+    "${PREPROC_FLAGS[@]}" \
+    -MM $OVM_LIBRARY_OBJS \
+    Modules/ovm.c \
+    $(cat $abs_c_module_srcs)
+
+  rm pyconfig.h
 }
 
 # NOTE: 91 headers in Include, but only 81 referenced here.  So it's worth it.
@@ -306,6 +318,7 @@ python-headers() {
   _headers $c_module_srcs \
     | egrep --only-matching '[^ ]+\.h' \
     | grep -v '_build/detected-config.h' \
+    | grep -v 'pyconfig.h' \
     | sed 's|^Python/../||' \
     | sort | uniq | add-py27
 }
