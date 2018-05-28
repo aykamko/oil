@@ -13,7 +13,11 @@ readonly OSH=${OSH:-bin/osh}
 
 readonly UNAME=$(uname)
 
-if [[ "$UNAME" == "Darwin" ]]; then
+is_macos() {
+  [[ "$UNAME" == "Darwin" ]] || return 1
+}
+
+if is_macos; then
   readonly NPROC=$(sysctl -n hw.ncpu)
 else  # Linux
   readonly NPROC=$(nproc)

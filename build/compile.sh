@@ -96,12 +96,12 @@ Modules/gcmodule.c
 # 'configure' output.
 MODOBJS='
 Modules/posixmodule.c
-Modules/errnomodule.c  
+Modules/errnomodule.c
 Modules/pwdmodule.c
-Modules/_sre.c  
-Modules/_codecsmodule.c  
+Modules/_sre.c
+Modules/_codecsmodule.c
 Modules/_weakref.c
-Modules/zipimport.c  
+Modules/zipimport.c
 Modules/signalmodule.c
 '
 
@@ -111,7 +111,7 @@ OVM_LIBRARY_OBJS="
 Modules/getbuildinfo.c
 Parser/myreadline.c
 $OBJECT_OBJS
-$OVM_PYTHON_OBJS 
+$OVM_PYTHON_OBJS
 $MODULE_OBJS
 $MODOBJS
 "
@@ -262,9 +262,21 @@ python-sources() {
   echo "$OVM_LIBRARY_OBJS" | add-py27
 }
 
+_setup-platform-pyconfig-h() {
+  pushd $PY27
+  if is_macos; then
+    cp pyconfig.macos.h pyconfig.h
+  else
+    cp pyconfig.linux.h pyconfig.h
+  fi
+  popd
+}
+
 _headers() {
   local c_module_srcs=${1:-_tmp/hello/c-module-srcs.txt}
   local abs_c_module_srcs=$PWD/$c_module_srcs
+
+  _setup-platform-pyconfig-h
 
   # -MM: no system headers
   cd $PY27
@@ -273,7 +285,7 @@ _headers() {
     "${PREPROC_FLAGS[@]}" \
     -MM $OVM_LIBRARY_OBJS \
     Modules/ovm.c \
-    $(cat $abs_c_module_srcs) 
+    $(cat $abs_c_module_srcs)
 }
 
 # NOTE: 91 headers in Include, but only 81 referenced here.  So it's worth it.

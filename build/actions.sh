@@ -22,7 +22,7 @@ main-name() {
   local python_main=${1:-hello}
   local ovm_bundle_prefix=${2:-hello.ovm}
 
-  cat <<EOF 
+  cat <<EOF
 char* MAIN_NAME = "$python_main";
 #if OVM_DEBUG
   char* OVM_BUNDLE_FILENAME = "${ovm_bundle_prefix}-dbg";
@@ -81,16 +81,6 @@ py-to-compile() {
     $CPYTHON_PROG -S build/app_deps.py py $main_module
 }
 
-symlink-platform-pyconfig-h() {
-  pushd $PY27
-  if is_macos; then
-    ln -f pyconfig.macos.h pyconfig.h
-  else
-    ln -f pyconfig.linux.h pyconfig.h
-  fi
-  popd
-}
-
 # For embedding in oil/bytecode.zip.
 quick-ref-manifest() {
   local dir=$1
@@ -104,7 +94,7 @@ pyc-version-manifest() {
 
   # Just show a string like "bytecode-opy.zip" for now.  There is no OPy
   # version yet.
-  local filename=$(basename $manifest_path) 
+  local filename=$(basename $manifest_path)
   local user_str=${filename%-manifest.txt}.zip
   local dir=$(dirname $manifest_path)
 
@@ -222,7 +212,7 @@ clean-repo() {
 # - There are no object files written now.
 # - We're not cleaning _build/detect-config.* ?
 clean-source-tarball-build() {
-  rm -f -v _bin/oil.* 
+  rm -f -v _bin/oil.*
   rm -f -v _build/oil/ovm _build/oil/ovm-dbg
 }
 
