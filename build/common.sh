@@ -29,36 +29,22 @@ is_macos() {
 }
 
 if is_macos; then
+  if ! brew --prefix coreutils >/dev/null >&1; then
+    echo 'Please install Mac OS dependendies: build/dev.sh macos-deps' >&2
+    exit 1
+  fi
+
   readonly NPROC=$(sysctl -n hw.ncpu)
   readonly CPYTHON_PROG="$PREPARE_DIR/python.exe"
-
-  if ! hash gdate 2>/dev/null; then
-    echo 'Please install coreutils: brew install coreutils' >&2
-    exit 1
-  fi
   readonly DATE_PROG=gdate
-  readonly OBJCOPY_PROG=gobjcopy
-
-  gnuawkdir=$(brew --prefix gawk 2>/dev/null || true)
-  if [[ ! -d "$gnuawkdir" ]]; then
-    echo 'Please install gawk: brew install gawk' >&2
-    exit 1
-  fi
-  readonly AWK_PROG="$gnuawkdir/bin/gawk"
-
-  if ! hash gtar 2>/dev/null; then
-    echo 'Please install gnu-tar: brew install gnu-tar' >&2
-    exit 1
-  fi
+  readonly AWK_PROG="$(brew --prefix gawk 2>/dev/null)/bin/gawk"
   readonly TAR_PROG=gtar
-
 else  # Linux
   readonly NPROC=$(nproc)
   readonly CPYTHON_PROG="$PREPARE_DIR/python"
   readonly DATE_PROG=date
   readonly AWK_PROG=awk
   readonly TAR_PROG=tar
-  readonly OBJCOPY_PROG=objcopy
 fi
 
 

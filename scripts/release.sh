@@ -197,9 +197,6 @@ _compressed-tarball() {
   # out of date.)
   build/actions.sh write-release-date
 
-  # XXX
-  build/actions.sh symlink-platform-pyconfig-h
-
   #make -d -r $in  # To debug
   make $in
   time gzip -c $in > $out
