@@ -30,7 +30,7 @@ macos-deps() {
     exit 1
   fi
 
-  brew install coreutils gawk gnu-tar
+  brew install coreutils readline gawk gnu-tar
 }
 
 # Produces _devbuild/gen/osh_help.py
