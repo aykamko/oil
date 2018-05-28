@@ -15,14 +15,14 @@ write-release-date() {
   mkdir -p _build  # Makefile makes this, but scripts/release.sh needs it too
 
   # Write a readable, sortable date that is independent of time zone.
-  $DATE_PROG --utc --rfc-3339 seconds > _build/release-date.txt
+  date --utc --rfc-3339 seconds > _build/release-date.txt
 }
 
 main-name() {
   local python_main=${1:-hello}
   local ovm_bundle_prefix=${2:-hello.ovm}
 
-  cat <<EOF
+  cat <<EOF 
 char* MAIN_NAME = "$python_main";
 #if OVM_DEBUG
   char* OVM_BUNDLE_FILENAME = "${ovm_bundle_prefix}-dbg";
@@ -39,11 +39,11 @@ c-module-toc() {
 
 # Modules needed to 'import runpy'.
 runpy-deps() {
-  $CPYTHON_PROG -S build/runpy_deps.py both "$@"
+  $PREPARE_DIR/python -S build/runpy_deps.py both "$@"
 }
 
 runpy-py-to-compile() {
-  $CPYTHON_PROG -S build/runpy_deps.py py
+  $PREPARE_DIR/python -S build/runpy_deps.py py
 }
 
 # This version gets the paths out of the repo.  But it requires that we
@@ -69,7 +69,7 @@ app-deps() {
   ln -s -f $PWD/build/app_deps.py _tmp
 
   PYTHONPATH=$pythonpath \
-    $CPYTHON_PROG -S _tmp/app_deps.py both $main_module $prefix
+    $PREPARE_DIR/python -S _tmp/app_deps.py both $main_module $prefix
 }
 
 # .py files to compile
@@ -78,7 +78,7 @@ py-to-compile() {
   local main_module=${2:-hello}
 
   PYTHONPATH=$pythonpath \
-    $CPYTHON_PROG -S build/app_deps.py py $main_module
+    $PREPARE_DIR/python -S build/app_deps.py py $main_module
 }
 
 # For embedding in oil/bytecode.zip.
@@ -94,7 +94,7 @@ pyc-version-manifest() {
 
   # Just show a string like "bytecode-opy.zip" for now.  There is no OPy
   # version yet.
-  local filename=$(basename $manifest_path)
+  local filename=$(basename $manifest_path) 
   local user_str=${filename%-manifest.txt}.zip
   local dir=$(dirname $manifest_path)
 
@@ -153,7 +153,7 @@ gen-module-init() {
 
   local template=$PY27/Modules/config.c.in
 
-  $AWK_PROG -v template="$template" -v extdecls="$extdecls" -v initbits="$initbits" '
+  awk -v template=$template -v extdecls="$extdecls" -v initbits="$initbits" '
     BEGIN {
       print "/* Generated automatically from " template " */"
     }
@@ -168,7 +168,7 @@ gen-module-init() {
     {
       print $0
     }
-    ' "$template"
+    ' $template
 }
 
 #
@@ -212,7 +212,7 @@ clean-repo() {
 # - There are no object files written now.
 # - We're not cleaning _build/detect-config.* ?
 clean-source-tarball-build() {
-  rm -f -v _bin/oil.*
+  rm -f -v _bin/oil.* 
   rm -f -v _build/oil/ovm _build/oil/ovm-dbg
 }
 

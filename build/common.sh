@@ -29,22 +29,9 @@ is_macos() {
 }
 
 if is_macos; then
-  if ! brew --prefix coreutils >/dev/null >&1; then
-    echo 'Please install Mac OS dependendies: build/dev.sh macos-deps' >&2
-    exit 1
-  fi
-
   readonly NPROC=$(sysctl -n hw.ncpu)
-  readonly CPYTHON_PROG="$PREPARE_DIR/python.exe"
-  readonly DATE_PROG=gdate
-  readonly AWK_PROG="$(brew --prefix gawk 2>/dev/null)/bin/gawk"
-  readonly TAR_PROG=gtar
 else  # Linux
   readonly NPROC=$(nproc)
-  readonly CPYTHON_PROG="$PREPARE_DIR/python"
-  readonly DATE_PROG=date
-  readonly AWK_PROG=awk
-  readonly TAR_PROG=tar
 fi
 
 

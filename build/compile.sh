@@ -360,7 +360,7 @@ make-tar() {
   # - We include intermediate files like c-module-srcs.txt, so we don't have to
   #   ship tools app_deps.py.  The end-user build shouldn't depend on Python.
 
-  $TAR_PROG --create --transform "$sed_expr" --file $out \
+  tar --create --transform "$sed_expr" --file $out \
     LICENSE.txt \
     INSTALL.txt \
     configure \
