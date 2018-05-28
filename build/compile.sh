@@ -171,7 +171,11 @@ build() {
 
   pushd $PY27
 
-  _setup-platform-pyconfig-h
+  if is_macos; then
+    cp pyconfig.macos.h pyconfig.h
+  else
+    cp pyconfig.linux.h pyconfig.h
+  fi
 
   local readline_dir
   local readline_flags
@@ -264,36 +268,34 @@ python-sources() {
   echo "$OVM_LIBRARY_OBJS" | add-py27
 }
 
-_setup-platform-pyconfig-h() {
-  if is_macos; then
-    cp pyconfig.macos.h pyconfig.h
-  else
-    cp pyconfig.linux.h pyconfig.h
-  fi
+_gcc_extract_headers() {
+  # -MM: no system headers
+  local abs_c_module_srcs=$1
+  gcc \
+    "${INCLUDE_PATHS[@]}" \
+    "${PREPROC_FLAGS[@]}" \
+    -MM $OVM_LIBRARY_OBJS \
+    Modules/ovm.c \
+    $(cat $abs_c_module_srcs)
 }
 
 _headers() {
   local c_module_srcs=${1:-_tmp/hello/c-module-srcs.txt}
   local abs_c_module_srcs=$PWD/$c_module_srcs
 
-  # -MM: no system headers
   cd $PY27
 
+  # HACK: We extract Python headers twice, once with a Linux pyconfig.h and
+  # again with a Mac OS pyconfig.h. This ensures that we package all
+  # headers required for either distribution. When we compile a binary in
+  # build(), we put the platform-specific pyconfig.h in place so that only
+  # platform-required source files are compiled.
+
   cp pyconfig.linux.h pyconfig.h
-  gcc \
-    "${INCLUDE_PATHS[@]}" \
-    "${PREPROC_FLAGS[@]}" \
-    -MM $OVM_LIBRARY_OBJS \
-    Modules/ovm.c \
-    $(cat $abs_c_module_srcs)
+  _gcc_extract_headers "$abs_c_module_srcs"
 
   cp pyconfig.macos.h pyconfig.h
-  gcc \
-    "${INCLUDE_PATHS[@]}" \
-    "${PREPROC_FLAGS[@]}" \
-    -MM $OVM_LIBRARY_OBJS \
-    Modules/ovm.c \
-    $(cat $abs_c_module_srcs)
+  _gcc_extract_headers "$abs_c_module_srcs"
 
   rm pyconfig.h
 }
